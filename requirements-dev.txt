@@ -1,0 +1,8 @@
+# Full local setup: index building, hybrid (semantic) search, preprocessing, tests
+-r requirements.txt
+rank-bm25
+chromadb
+sentence-transformers
+pandas>=2.0
+PyMuPDF>=1.23
+pytest

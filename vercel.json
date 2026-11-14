@@ -1,24 +1,17 @@
-
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "backend/main.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "frontend/**",
-      "use": "@vercel/static"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60,
+      "includeFiles": "{backend/**,llm/**,embedding/*.py,chunking/chunks.json,data_processed/knowledge_base.json,data_processed/experiments_normalized.json}",
+      "excludeFiles": "{DATA/**,embedding/chroma_db/**,data_processed/chunks.json,data_processed/chunks.jsonl,data_processed/extracted_pdf_reports.json,data_processed/extracted_tables/**,public/**,docs/**,.git/**}"
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "backend/main.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend/$1"
-    }
+  },
+  "rewrites": [
+    { "source": "/health", "destination": "/api/index" },
+    { "source": "/docs", "destination": "/api/index" },
+    { "source": "/openapi.json", "destination": "/api/index" },
+    { "source": "/api/:path*", "destination": "/api/index" }
   ]
 }

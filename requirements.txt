@@ -1,12 +1,7 @@
+# Runtime dependencies only (kept small to fit Vercel's 250 MB function limit).
+# For local index building / semantic search use: pip install -r requirements-dev.txt
 fastapi
 uvicorn[standard]
 pydantic>=2
 python-dotenv
-rank-bm25
-chromadb
-sentence-transformers
 google-genai
-pandas>=2.0
-PyMuPDF>=1.23
-pytest
-

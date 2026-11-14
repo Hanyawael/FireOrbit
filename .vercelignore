@@ -1,0 +1,14 @@
+# Not needed at runtime - keeps the deployment small and fast
+DATA/
+embedding/chroma_db/
+data_processed/chunks.json
+data_processed/chunks.jsonl
+data_processed/extracted_pdf_reports.json
+data_processed/extracted_tables/
+preprocessing/
+test_llm_layer.py
+run_answers.py
+ask.py
+.env
+.env.*
+__pycache__/
