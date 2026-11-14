@@ -360,7 +360,7 @@
     try {
       const r = await fetch(base + '/health', { signal: ctl.signal }); const j = await r.json();
       if (!r.ok || j.status !== 'ok') throw new Error('unexpected response');
-      st.innerHTML = `<span style="color:#3fb950">●</span> Backend connected · AI answers ${j.llm_configured ? 'on' : 'off (no GEMINI_API_KEY)'} · retrieval: ${j.retrieval_mode || (j.vector_search ? 'hybrid' : 'keyword')}`;
+      st.innerHTML = `<span style="color:#3fb950">●</span> Backend connected · AI answers ${j.llm_configured ? 'on' : 'off (no GEMINI_API_KEY)'} · retrieval: ${j.retrieval_mode === 'hybrid' ? 'hybrid (keyword + semantic)' : 'keyword only'}`;
     } catch (e) {
       st.innerHTML = `<span style="color:#f85149">●</span> Backend not reachable at ${esc(base)} — using local keyword search. Start it with <code>uvicorn backend.main:app --reload</code>.`;
     } finally { clearTimeout(t); }

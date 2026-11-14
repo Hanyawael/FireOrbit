@@ -15,9 +15,6 @@ import argparse
 import json
 from pathlib import Path
 
-import chromadb
-from sentence_transformers import SentenceTransformer
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CHUNKS = PROJECT_ROOT / "chunking" / "chunks.json"
 DEFAULT_DB_DIR = PROJECT_ROOT / "index" / "chroma"
@@ -54,6 +51,9 @@ def load_chunks(path: Path) -> list[dict]:
 
 
 def build(args) -> None:
+    import chromadb
+    from sentence_transformers import SentenceTransformer
+
     chunks = load_chunks(args.chunks)
     model = SentenceTransformer(args.model)
     doc_prefix, _ = prefixes(args.model)
@@ -82,6 +82,9 @@ def build(args) -> None:
 
 
 def query(args) -> None:
+    import chromadb
+    from sentence_transformers import SentenceTransformer
+
     client = chromadb.PersistentClient(path=str(args.db_dir))
     collection = client.get_collection(COLLECTION)
     model = SentenceTransformer(args.model)

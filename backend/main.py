@@ -30,4 +30,4 @@ def health():
     k = d.kb()
     return {"status": "ok", "generated_at": k["generated_at"], "investigations": k["total_investigations"],
             "experiments": len(d.experiments()), "llm_configured": ai.llm_available(),
-            "vector_search": ai.vector_ready(), "retrieval_mode": "hybrid" if ai.vector_ready() else "keyword"}
+            "retrieval_mode": ai.retrieval_mode()}

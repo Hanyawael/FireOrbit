@@ -45,3 +45,6 @@ Thumbs.db
 .vscode/
 .idea/
 .env
+
+# Resumable partial output of embedding/build_vectors.py
+embedding/vectors_partial.npz

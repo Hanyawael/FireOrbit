@@ -25,8 +25,6 @@ import re
 from pathlib import Path
 from typing import Any
 
-import chromadb
-
 try:
     from .build_index import COLLECTION, DEFAULT_DB_DIR, prefixes
 except ImportError:
@@ -239,6 +237,7 @@ class Retriever:
                  model_name: str = "BAAI/bge-small-en-v1.5", mode: str = "hybrid"):
         if mode not in {"hybrid", "dense", "bm25"}:
             raise ValueError("mode must be hybrid, dense or bm25")
+        import chromadb
         self.mode = mode
         self.collection = chromadb.PersistentClient(path=str(db_dir)).get_collection(COLLECTION)
         self.model = None

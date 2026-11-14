@@ -33,18 +33,42 @@ def vector_ready() -> bool:
     return (CHROMA_PATH / "chroma.sqlite3").exists()
 
 
+_retriever_failed = False
+
+
 def get_retriever():
-    """Lazily load and cache the hybrid Retriever."""
-    global _retriever
-    if _retriever is not None:
+    """Lazily load and cache a hybrid retriever.
+
+    1. Full local stack (chromadb + sentence-transformers + built index) if available.
+    2. Otherwise the serverless-friendly LiteRetriever (BM25 + precomputed Gemini vectors) - used on Vercel.
+    """
+    global _retriever, _retriever_failed
+    if _retriever is not None or _retriever_failed:
         return _retriever
+    if vector_ready():
+        try:
+            from embedding.retrieval import Retriever
+            _retriever = Retriever(mode="hybrid")
+            return _retriever
+        except Exception as exc:
+            print(f"[AI] Full hybrid Retriever unavailable ({exc}); using LiteRetriever")
     try:
-        from embedding.retrieval import Retriever
-        _retriever = Retriever(mode="hybrid")
-        return _retriever
+        from embedding.lite_retrieval import LiteRetriever
+        _retriever = LiteRetriever()
+        if not _retriever.dense_ready:
+            print(f"[AI] LiteRetriever running keyword-only: {_retriever.dense_error}")
     except Exception as exc:
-        print(f"[AI] Failed to initialize hybrid Retriever: {exc}")
-        return None
+        _retriever_failed = True
+        print(f"[AI] Failed to initialize retriever: {exc}")
+    return _retriever
+
+
+def retrieval_mode() -> str:
+    """'hybrid' when semantic + keyword search are both active, else 'keyword'."""
+    r = get_retriever()
+    if r is None:
+        return "keyword"
+    return "hybrid" if getattr(r, "dense_ready", True) else "keyword"
 
 
 @lru_cache
@@ -107,18 +131,18 @@ def keyword_search(q: str, top_k: int, psi_id: Optional[str] = None, include_gen
 
 
 def retrieve(q: str, top_k: int = 6, psi_id: Optional[str] = None, include_general: bool = False):
-    """Retrieve using hybrid Retriever, with keyword fallback if unavailable."""
+    """Hybrid retrieval (keyword + semantic); degrades to keyword-only, then to the legacy keyword scorer."""
     if is_conversational_or_irrelevant(q):
         return "none", [], None, None
 
     retriever = get_retriever()
     if retriever:
         try:
-            # min_score=0.65 allows natural queries with slight wording variations through without false negatives
-            hits = retriever.search(q, top_k=top_k, psi_id=psi_id, min_score=0.65)
+            # min_score=0.65 is the bge gate of the full Retriever; LiteRetriever uses LITE_MIN_DENSE instead.
+            hits = retriever.search(q, top_k=top_k, psi_id=psi_id, min_score=0.65 if hasattr(retriever, "model") else None)
             total = retriever.last_route.get("total_matches")
             summary = retriever.last_route.get("match_summary")
-            return "hybrid", hits, total, summary
+            return getattr(retriever, "last_mode", "hybrid"), hits, total, summary
         except Exception as exc:
             print(f"[AI] Hybrid retrieval error: {exc}")
     # Fallback to local keyword search only if retriever failed to initialize
