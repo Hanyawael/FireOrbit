@@ -339,7 +339,7 @@
   }
 
   /* ---- FireOrbit API (FastAPI backend) ---- */
-  const DEFAULT_API = 'http://localhost:8000';
+  const DEFAULT_API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:8000' : location.origin; // same origin when deployed
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } }
   function apiBase() {

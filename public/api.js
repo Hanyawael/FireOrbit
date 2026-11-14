@@ -6,7 +6,7 @@
  */
 (function () {
   'use strict';
-  const DEFAULT_API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:8000' : ''; // same origin on Vercel
+  const DEFAULT_API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:8000' : location.origin; // same origin when deployed
   const EXP_PAGE = 500; // backend max page size
   const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const saved = lsGet('fireorbit.api');
